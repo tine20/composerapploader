@@ -49,8 +49,20 @@ class Tine20Installer extends LibraryInstaller
 
         $this->io->writeError('    Creating Links');
 
+        $vendorPart = trim($this->composer->getConfig()->get('vendor-dir', \Composer\Config::RELATIVE_PATHS), '/');
+        if (strlen($vendorPart) > 0) {
+            $vendorPart .= '/';
+        }
+
+        $vendorPart .= $package->getPrettyName();
+        $targetDir = $package->getTargetDir();
+
+        $vendorPart .= ($targetDir ? '/'.$targetDir : '');
+
         foreach($extra['symlinks'] as $trgt => $src) {
-            exec('ln -s ' . rtrim($this->getInstallPath($package), '/') . '/' . $src . ' ' . $basePath . $trgt);
+            //exec('ln -s ' . rtrim($this->getInstallPath($package), '/') . '/' . $src . ' ' . $basePath . $trgt);
+            $this->io->writeError('     ln -s ' . './' . $vendorPart . '/' . $src . ' ' . $basePath . $trgt);
+            exec('ln -s ' . './' . $vendorPart . '/' . $src . ' ' . $basePath . $trgt);
         }
     }
 
