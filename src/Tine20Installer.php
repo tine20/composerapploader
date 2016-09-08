@@ -59,10 +59,40 @@ class Tine20Installer extends LibraryInstaller
 
         $vendorPart .= ($targetDir ? '/'.$targetDir : '');
 
+        $baseDirs = explode(PATH_SEPARATOR, $basePath);
+
         foreach($extra['symlinks'] as $trgt => $src) {
-            //exec('ln -s ' . rtrim($this->getInstallPath($package), '/') . '/' . $src . ' ' . $basePath . $trgt);
-            $this->io->writeError('     ln -s ' . './' . $vendorPart . '/' . $src . ' ' . $basePath . $trgt);
-            exec('ln -s ' . './' . $vendorPart . '/' . $src . ' ' . $basePath . $trgt);
+
+            $dirs = explode(PATH_SEPARATOR, $trgt);
+            $prefix = '';
+
+            if (($count = count($dirs)) > 1) {
+                reset($baseDirs);
+                $start = true;
+                $i = 0;
+                $postfix = '';
+                foreach($dirs as $dir) {
+                    // we ignore last path part
+                    if (++$i === $count) {
+                        break;
+                    }
+                    if ($dir === '..') {
+                        if (!$start) {
+                            $this->io->writeError('     illegal path found: "' . $trgt .'"');
+                            continue 2;
+                        }
+                        $postfix = current($baseDirs) . '/';
+                        next($baseDirs);
+                    } else {
+                        $start = false;
+                        $prefix .= '../';
+                    }
+                }
+                $prefix .= $postfix;
+            }
+
+            $this->io->writeError('     ln -s ' . './' . $prefix . $vendorPart . '/' . $src . ' ' . $basePath . $trgt);
+            exec('ln -s ' . './' . $prefix . $vendorPart . '/' . $src . ' ' . $basePath . $trgt);
         }
     }
 
