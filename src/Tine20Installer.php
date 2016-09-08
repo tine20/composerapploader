@@ -59,15 +59,13 @@ class Tine20Installer extends LibraryInstaller
 
         $vendorPart .= ($targetDir ? '/'.$targetDir : '');
 
-        $baseDirs = explode(PATH_SEPARATOR, $basePath);
-
         foreach($extra['symlinks'] as $trgt => $src) {
 
-            $dirs = explode(PATH_SEPARATOR, $trgt);
+            $dirs = explode('/', $trgt);
             $prefix = '';
 
             if (($count = count($dirs)) > 1) {
-                reset($baseDirs);
+                $baseDirs = explode('/', trim($basePath, '/'));
                 $start = true;
                 $i = 0;
                 $postfix = '';
@@ -81,8 +79,7 @@ class Tine20Installer extends LibraryInstaller
                             $this->io->writeError('     illegal path found: "' . $trgt .'"');
                             continue 2;
                         }
-                        $postfix = current($baseDirs) . '/';
-                        next($baseDirs);
+                        $postfix .= array_pop($baseDirs) . '/';
                     } else {
                         $start = false;
                         $prefix .= '../';
