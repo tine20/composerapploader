@@ -91,6 +91,39 @@ class Tine20Installer extends LibraryInstaller
             $this->io->writeError('     ln -s ' . './' . $prefix . $vendorPart . '/' . $src . ' ' . $basePath . $trgt);
             exec('ln -s ' . './' . $prefix . $vendorPart . '/' . $src . ' ' . $basePath . $trgt);
         }
+
+        foreach($extra['reverseSymlinks'] as $trgt => $src) {
+
+            $dirs = explode('/', $src);
+            $prefix = '';
+
+            if (($count = count($dirs)) > 1) {
+                $baseDirs = explode('/', trim($basePath, '/'));
+                $start = true;
+                $i = 0;
+                $postfix = '';
+                foreach($dirs as $dir) {
+                    // we ignore last path part
+                    if (++$i === $count) {
+                        break;
+                    }
+                    if ($dir === '..') {
+                        if (!$start) {
+                            $this->io->writeError('     illegal path found: "' . $trgt .'"');
+                            continue 2;
+                        }
+                        $postfix .= array_pop($baseDirs) . '/';
+                    } else {
+                        $start = false;
+                        $prefix .= '../';
+                    }
+                }
+                $prefix .= $postfix;
+            }
+
+            $this->io->writeError('     ln -s ' .  $basePath . $src . ' ./' . $prefix . $vendorPart . '/' . $trgt);
+            exec('ln -s ' . $basePath . $src . ' ./' . $prefix . $vendorPart . '/' . $trgt);
+        }
     }
 
     protected function removeTine20Links(PackageInterface $package)
