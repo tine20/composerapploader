@@ -59,70 +59,74 @@ class Tine20Installer extends LibraryInstaller
 
         $vendorPart .= ($targetDir ? '/'.$targetDir : '');
 
-        foreach($extra['symlinks'] as $trgt => $src) {
+        if (isset($extra['symlinks'])) {
+            foreach ($extra['symlinks'] as $trgt => $src) {
 
-            $dirs = explode('/', $trgt);
-            $prefix = '';
+                $dirs = explode('/', $trgt);
+                $prefix = '';
 
-            if (($count = count($dirs)) > 1) {
-                $baseDirs = explode('/', trim($basePath, '/'));
-                $start = true;
-                $i = 0;
-                $postfix = '';
-                foreach($dirs as $dir) {
-                    // we ignore last path part
-                    if (++$i === $count) {
-                        break;
-                    }
-                    if ($dir === '..') {
-                        if (!$start) {
-                            $this->io->writeError('     illegal path found: "' . $trgt .'"');
-                            continue 2;
+                if (($count = count($dirs)) > 1) {
+                    $baseDirs = explode('/', trim($basePath, '/'));
+                    $start = true;
+                    $i = 0;
+                    $postfix = '';
+                    foreach ($dirs as $dir) {
+                        // we ignore last path part
+                        if (++$i === $count) {
+                            break;
                         }
-                        $postfix .= array_pop($baseDirs) . '/';
-                    } else {
-                        $start = false;
-                        $prefix .= '../';
+                        if ($dir === '..') {
+                            if (!$start) {
+                                $this->io->writeError('     illegal path found: "' . $trgt . '"');
+                                continue 2;
+                            }
+                            $postfix .= array_pop($baseDirs) . '/';
+                        } else {
+                            $start = false;
+                            $prefix .= '../';
+                        }
                     }
+                    $prefix .= $postfix;
                 }
-                $prefix .= $postfix;
-            }
 
-            $this->io->writeError('     ln -s ' . './' . $prefix . $vendorPart . '/' . $src . ' ' . $basePath . $trgt);
-            exec('ln -s ' . './' . $prefix . $vendorPart . '/' . $src . ' ' . $basePath . $trgt);
+                $this->io->writeError('     ln -s ' . './' . $prefix . $vendorPart . '/' . $src . ' ' . $basePath . $trgt);
+                exec('ln -s ' . './' . $prefix . $vendorPart . '/' . $src . ' ' . $basePath . $trgt);
+            }
         }
 
-        foreach($extra['reverseSymlinks'] as $trgt => $src) {
+        if (isset($extra['reverseSymlinks'])) {
+            foreach ($extra['reverseSymlinks'] as $trgt => $src) {
 
-            $dirs = explode('/', $src);
-            $prefix = '';
+                $dirs = explode('/', $src);
+                $prefix = '';
 
-            if (($count = count($dirs)) > 1) {
-                $baseDirs = explode('/', trim($basePath, '/'));
-                $start = true;
-                $i = 0;
-                $postfix = '';
-                foreach($dirs as $dir) {
-                    // we ignore last path part
-                    if (++$i === $count) {
-                        break;
-                    }
-                    if ($dir === '..') {
-                        if (!$start) {
-                            $this->io->writeError('     illegal path found: "' . $trgt .'"');
-                            continue 2;
+                if (($count = count($dirs)) > 1) {
+                    $baseDirs = explode('/', trim($basePath, '/'));
+                    $start = true;
+                    $i = 0;
+                    $postfix = '';
+                    foreach ($dirs as $dir) {
+                        // we ignore last path part
+                        if (++$i === $count) {
+                            break;
                         }
-                        $postfix .= array_pop($baseDirs) . '/';
-                    } else {
-                        $start = false;
-                        $prefix .= '../';
+                        if ($dir === '..') {
+                            if (!$start) {
+                                $this->io->writeError('     illegal path found: "' . $trgt . '"');
+                                continue 2;
+                            }
+                            $postfix .= array_pop($baseDirs) . '/';
+                        } else {
+                            $start = false;
+                            $prefix .= '../';
+                        }
                     }
+                    $prefix .= $postfix;
                 }
-                $prefix .= $postfix;
-            }
 
-            $this->io->writeError('     ln -s ' .  $basePath . $src . ' ./' . $prefix . $vendorPart . '/' . $trgt);
-            exec('ln -s ' . $basePath . $src . ' ./' . $prefix . $vendorPart . '/' . $trgt);
+                $this->io->writeError('     ln -s ' . $basePath . $src . ' ./' . $prefix . $vendorPart . '/' . $trgt);
+                exec('ln -s ' . $basePath . $src . ' ./' . $prefix . $vendorPart . '/' . $trgt);
+            }
         }
     }
 
@@ -137,8 +141,54 @@ class Tine20Installer extends LibraryInstaller
 
         $this->io->writeError('    Removing Links');
 
-        foreach($extra['symlinks'] as $trgt => $src) {
-            exec('rm ' . $basePath . $trgt);
+        if (isset($extra['symlinks'])) {
+            foreach ($extra['symlinks'] as $trgt => $src) {
+                exec('rm ' . $basePath . $trgt);
+            }
+        }
+
+        if (isset($extra['reverseSymlinks'])) {
+            $vendorPart = trim($this->composer->getConfig()->get('vendor-dir', \Composer\Config::RELATIVE_PATHS), '/');
+            if (strlen($vendorPart) > 0) {
+                $vendorPart .= '/';
+            }
+
+            $vendorPart .= $package->getPrettyName();
+            $targetDir = $package->getTargetDir();
+
+            $vendorPart .= ($targetDir ? '/'.$targetDir : '');
+
+            foreach ($extra['reverseSymlinks'] as $trgt => $src) {
+
+                $dirs = explode('/', $src);
+                $prefix = '';
+
+                if (($count = count($dirs)) > 1) {
+                    $baseDirs = explode('/', trim($basePath, '/'));
+                    $start = true;
+                    $i = 0;
+                    $postfix = '';
+                    foreach ($dirs as $dir) {
+                        // we ignore last path part
+                        if (++$i === $count) {
+                            break;
+                        }
+                        if ($dir === '..') {
+                            if (!$start) {
+                                $this->io->writeError('     illegal path found: "' . $trgt . '"');
+                                continue 2;
+                            }
+                            $postfix .= array_pop($baseDirs) . '/';
+                        } else {
+                            $start = false;
+                            $prefix .= '../';
+                        }
+                    }
+                    $prefix .= $postfix;
+                }
+
+                exec('rm ./' . $prefix . $vendorPart . '/' . $trgt);
+            }
         }
     }
 
