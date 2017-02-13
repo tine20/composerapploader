@@ -124,8 +124,8 @@ class Tine20Installer extends LibraryInstaller
                     $prefix .= $postfix;
                 }
 
-                $this->io->writeError('     ln -s ' . $basePath . $src . ' ./' . $prefix . $vendorPart . '/' . $trgt);
-                exec('ln -s ' . $basePath . $src . ' ./' . $prefix . $vendorPart . '/' . $trgt);
+                $this->io->writeError('     ln -s ./' . $src . ' ./' . $prefix . $vendorPart . '/' . $trgt);
+                exec('ln -s ./' . $src . ' ./' . $prefix . $vendorPart . '/' . $trgt);
             }
         }
     }
