@@ -97,35 +97,14 @@ class Tine20Installer extends LibraryInstaller
         if (isset($extra['reverseSymlinks'])) {
             foreach ($extra['reverseSymlinks'] as $trgt => $src) {
 
-                $dirs = explode('/', $src);
-                $prefix = '';
-
-                if (($count = count($dirs)) > 1) {
-                    $baseDirs = explode('/', trim($basePath, '/'));
-                    $start = true;
-                    $i = 0;
-                    $postfix = '';
-                    foreach ($dirs as $dir) {
-                        // we ignore last path part
-                        if (++$i === $count) {
-                            break;
-                        }
-                        if ($dir === '..') {
-                            if (!$start) {
-                                $this->io->writeError('     illegal path found: "' . $trgt . '"');
-                                continue 2;
-                            }
-                            $postfix .= array_pop($baseDirs) . '/';
-                        } else {
-                            $start = false;
-                            $prefix .= '../';
-                        }
-                    }
-                    $prefix .= $postfix;
+                $srcPrefix = '';
+                $dirs = explode ('/', $vendorPart);
+                foreach ($dirs as $dir) {
+                    $srcPrefix .= '../';
                 }
 
-                $this->io->writeError('     ln -s ./' . $src . ' ./' . $prefix . $vendorPart . '/' . $trgt);
-                exec('ln -s ./' . $src . ' ./' . $prefix . $vendorPart . '/' . $trgt);
+                $this->io->writeError('     ln -s ./' . $srcPrefix . $src . ' ./' . $vendorPart . '/' . $trgt);
+                exec('ln -s ./' . $srcPrefix . $src . ' ./' . $vendorPart . '/' . $trgt);
             }
         }
     }
@@ -143,6 +122,7 @@ class Tine20Installer extends LibraryInstaller
 
         if (isset($extra['symlinks'])) {
             foreach ($extra['symlinks'] as $trgt => $src) {
+                $this->io->writeError('    rm ' . $basePath . $trgt);
                 exec('rm ' . $basePath . $trgt);
             }
         }
@@ -160,34 +140,8 @@ class Tine20Installer extends LibraryInstaller
 
             foreach ($extra['reverseSymlinks'] as $trgt => $src) {
 
-                $dirs = explode('/', $src);
-                $prefix = '';
-
-                if (($count = count($dirs)) > 1) {
-                    $baseDirs = explode('/', trim($basePath, '/'));
-                    $start = true;
-                    $i = 0;
-                    $postfix = '';
-                    foreach ($dirs as $dir) {
-                        // we ignore last path part
-                        if (++$i === $count) {
-                            break;
-                        }
-                        if ($dir === '..') {
-                            if (!$start) {
-                                $this->io->writeError('     illegal path found: "' . $trgt . '"');
-                                continue 2;
-                            }
-                            $postfix .= array_pop($baseDirs) . '/';
-                        } else {
-                            $start = false;
-                            $prefix .= '../';
-                        }
-                    }
-                    $prefix .= $postfix;
-                }
-
-                exec('rm ./' . $prefix . $vendorPart . '/' . $trgt);
+                $this->io->writeError('    rm ./' . $vendorPart . '/' . $trgt);
+                exec('rm ./' . $vendorPart . '/' . $trgt);
             }
         }
     }
