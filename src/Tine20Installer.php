@@ -98,6 +98,24 @@ class Tine20Installer extends LibraryInstaller
             foreach ($extra['reverseSymlinks'] as $trgt => $src) {
 
                 $srcPrefix = '';
+                $dirs = explode('/', $trgt);
+
+                if (($count = count($dirs)) > 1) {
+                    $i = 0;
+                    foreach ($dirs as $dir) {
+                        // we ignore last path part
+                        if (++$i === $count) {
+                            break;
+                        }
+                        if ($dir === '..') {
+                            $this->io->writeError('     illegal path found: "' . $trgt . '"');
+                            continue 2;
+                        } else {
+                            $srcPrefix .= '../';
+                        }
+                    }
+                }
+
                 $dirs = explode ('/', $vendorPart);
                 foreach ($dirs as $dir) {
                     $srcPrefix .= '../';
