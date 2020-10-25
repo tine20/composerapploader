@@ -13,6 +13,7 @@ namespace Tine20\ComposerAppLoader;
 
 use \Composer\Installer\LibraryInstaller;
 use \Composer\Package\PackageInterface;
+use Composer\Repository\InstalledRepositoryInterface;
 
 /**
  * Class Tine20Installer
@@ -178,5 +179,12 @@ class Tine20Installer extends LibraryInstaller
         parent::updateCode($initial, $target);
 
         $this->createTine20Links($target);
+    }
+
+    protected function removeCode(PackageInterface $package)
+    {
+        $this->removeTine20Links($package);
+
+        return parent::removeCode($package);
     }
 }

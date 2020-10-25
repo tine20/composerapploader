@@ -30,4 +30,18 @@ class Plugin implements \Composer\Plugin\PluginInterface
 
         $installationManager->addInstaller(new Tine20Installer($io, $composer, 'tine20application'));
     }
+
+    public function deactivate(Composer $composer, IOInterface $io)
+    {
+        $installationManager = $composer->getInstallationManager();
+
+        $installationManager->addInstaller(new Tine20Installer($io, $composer, 'tine20application'));
+    }
+
+    public function uninstall(Composer $composer, IOInterface $io)
+    {
+        $installationManager = $composer->getInstallationManager();
+
+        $installationManager->addInstaller(new Tine20Installer($io, $composer, 'tine20application'));
+    }
 }
